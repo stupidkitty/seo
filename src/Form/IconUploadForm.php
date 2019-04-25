@@ -1,7 +1,6 @@
 <?php
 namespace SK\SeoModule\Form;
 
-use Yii;
 use yii\base\Model;
 
 /**
