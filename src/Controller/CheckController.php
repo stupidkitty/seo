@@ -6,15 +6,11 @@ use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 
-use RS\Component\Core\Traits\ContainerAwareTrait;
-
 /**
  * CheckController
  */
 class CheckController extends Controller
 {
-    use ContainerAwareTrait;
-
     /**
      * @inheritdoc
      */
@@ -50,21 +46,6 @@ class CheckController extends Controller
 
         $reportFiles = $fileChecker->checkAll();
         $reportPages = $pageChecker->checkAll();
-
-        //dump($pagesInfo); exit;
-
-        /*$baseUrl = rtrim(Yii::$app->frontUrlManager->createAbsoluteUrl(['/']), '/');
-
-        $robots = '';
-        $errors = [];
-        try {
-            $robots = file_get_contents(Yii::getAlias('@root/web/robots.txt'));
-        } catch (\Exception $e) {
-            $errors[] = $e->getMessage();
-        }
-
-        $headers = get_headers("{$baseUrl}/robots.txt");
-        $responseCode = $headers[0];*/
 
         return $this->render('index', [
             'reportFiles' => $reportFiles,

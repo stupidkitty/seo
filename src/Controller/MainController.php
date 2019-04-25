@@ -10,8 +10,6 @@ use yii\filters\AccessControl;
  */
 class MainController extends Controller
 {
-    use ContainerAwareTrait;
-
     /**
      * @inheritdoc
      */
