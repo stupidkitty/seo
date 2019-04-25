@@ -44,6 +44,8 @@ class Module extends BaseModule
             $this->defaultRoute = 'run/index';
         }
 
+        $this->initContainer();
+
         //translations
         if (!isset(Yii::$app->get('i18n')->translations['seo'])) {
             Yii::$app->get('i18n')->translations['seo'] = [
@@ -51,6 +53,22 @@ class Module extends BaseModule
                 'basePath' => __DIR__ . '/Resources/i18n',
                 'sourceLanguage' => 'en-US',
             ];
+        }
+    }
+
+    /**
+     * Добавляет в контейнер DI необходимые классы.
+     */
+    protected function initContainer()
+    {
+        $di = Yii::$container;
+
+        try {
+            $di->set(Checker\FileChecker::class);
+            $di->set(Checker\PageChecker::class);
+            $di->set(Sitemap\SitemapGenerator::class);
+        } catch (Exception $e) {
+            die($e);
         }
     }
 }
