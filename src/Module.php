@@ -44,7 +44,7 @@ class Module extends BaseModule
             $this->defaultRoute = 'run/index';
         }
 
-        $this->initContainer();
+        $this->configureContainer();
 
         //translations
         if (!isset(Yii::$app->get('i18n')->translations['seo'])) {
@@ -59,7 +59,7 @@ class Module extends BaseModule
     /**
      * Добавляет в контейнер DI необходимые классы.
      */
-    protected function initContainer()
+    protected function configureContainer()
     {
         $di = Yii::$container;
 
