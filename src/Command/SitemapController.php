@@ -3,7 +3,7 @@ namespace SK\SeoModule\Command;
 
 use Yii;
 use yii\console\Controller;
-use SK\SeoModule\Sitemap\SitemapGenerator;
+use SK\SeoModule\Sitemap\SitemapBuilder;
 
 class SitemapController extends Controller
 {
@@ -13,7 +13,9 @@ class SitemapController extends Controller
      */
     public function actionCreate()
     {
-        $sitemapGenerator = Yii::$container->get(SitemapGenerator::class);
+        $sitemapBuilder = Yii::$container->get(SitemapBuilder::class);
+
+        $sitemapGenerator = $sitemapBuilder->build();
         $sitemapGenerator->generate();
     }
 

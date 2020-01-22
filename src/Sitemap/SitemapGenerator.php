@@ -1,77 +1,38 @@
 <?php
 namespace SK\SeoModule\Sitemap;
 
-use Yii;
-use yii\base\Event;
 use samdark\sitemap\Index;
-use yii\helpers\FileHelper;
 use samdark\sitemap\Sitemap;
-use RS\Component\Core\Settings\SettingsInterface;
 
 /**
  * https://github.com/samdark/sitemap
  */
 class SitemapGenerator
 {
-    public $baseSitemapUrl;
-    public $baseDirectory;
+    private $baseSitemapUrl;
+    private $outputDirectory;
 
-    private $urlManager;
-    private $index;
-    private $sitemapCollection = [];
-
-    const EVENT_BEFORE_GENERATE = 'beforeGenerate';
-
-    public function __construct(SettingsInterface $settings)
-    {
-        $siteUrl = $settings->get('site_url');
-
-        $this->urlManager = Yii::$app->urlManager;
-        $this->urlManager->setScriptUrl('/web/index.php');
-        $this->urlManager->setHostInfo($siteUrl);
-
-        $this->baseSitemapUrl = "{$siteUrl}/sitemap/";
-        $this->baseDirectory = Yii::getAlias('@root/web/sitemap');
-
-        if (!is_dir($this->baseDirectory)) {
-            FileHelper::CreateDirectory($this->baseDirectory, 0755);
-        }
-
-        $indexFilepath = $this->baseDirectory . '/index.xml';
-        $this->index = new Index($indexFilepath);
-    }
+    private $generators = [];
 
     /**
      * Генерация карт сайта.
      */
     public function generate()
     {
-        Event::trigger(static::class, static::EVENT_BEFORE_GENERATE, new Event(['sender' => $this]));
+        $index = new Index("{$this->outputDirectory}/index.xml");
 
-        foreach ($this->sitemapCollection as $row) { //['callback' => $callback, 'filename' => $filename]
-            $this->handle($row['callback'], $row['filename']);
+        $createdSitemaps = [];
+        foreach ($this->generators as $generator) {
+            $urls = $this->handle($generator);
+
+            $createdSitemaps = \array_merge($createdSitemaps, $urls);
         }
 
-        $this->index->write();
-    }
-
-    /**
-     * Добавление обработчиков для генерации карт.
-     *
-     * @param callable $callback Функция генерации урлов.
-     * @param string $filename Название файла, в который будут записаны урлы.
-     */
-    public function addSitemap(callable $callback, $filename = '')
-    {
-        if ('' === $filename) {
-            $sitemapNum = count($this->sitemapCollection) + 1;
-            $filename = "sitemap{$sitemapNum}.xml";
+        foreach ($createdSitemaps as $url) {
+            $index->addSitemap($url);
         }
 
-        $this->sitemapCollection[] = [
-            'filename' => $filename,
-            'callback' => $callback,
-        ];
+        $index->write();
     }
 
     /**
@@ -79,32 +40,66 @@ class SitemapGenerator
      *
      * @param callable $callback Функция генерации урлов.
      * @param string $filename Название файла, в который будут записаны урлы.
+     * @return array Список сгенерированных файлов.
      */
-    private function handle(callable $callback, $filename)
+    private function handle(SitemapHandlerInterface $generator): array
     {
-        $filepath = "{$this->baseDirectory}/{$filename}";
-        $sitemap = new Sitemap($filepath);
+        try {
+            $filename = $generator->getFilename();
+            $filepath = "{$this->outputDirectory}/{$filename}";
+            $sitemap = new Sitemap($filepath);
 
-        $callback($sitemap, $this->urlManager);
+            $generator->create($sitemap);
 
-        $sitemap->write();
+            $sitemap->write();
 
-        $sitemapFileUrls = $sitemap->getSitemapUrls($this->baseSitemapUrl);
-        $this->addSitemapToIndex($sitemapFileUrls);
+            return $sitemap->getSitemapUrls($this->baseSitemapUrl);
+        } catch (\Throwable $e) {
+            echo $e->getMessage() . "\n";
+
+            return [];
+        }
     }
 
     /**
-     * Добавление сгенерированных файлов в индексный файл.
+     * Устанавливает массив генераторов карт сайта.
      *
-     * @param array $sitemapFileUrls Коллекция урлов сгенерированных карт сайта.
+     * @param array $generators
+     * @return self
      */
-    private function addSitemapToIndex($sitemapFileUrls)
+    public function setGenerators(SitemapHandlerInterface ...$generators): self
     {
-        if (empty($sitemapFileUrls))
-            return;
+        $this->generators = $generators;
 
-        foreach ($sitemapFileUrls as $sitemapUrl) {
-            $this->index->addSitemap($sitemapUrl);
-        }
+        return $this;
+    }
+
+    /**
+     * Добавляет генератор карты мапы.
+     *
+     * @param SitemapHandlerInterface $generators
+     * @return self
+     */
+    public function addGenerator(SitemapHandlerInterface $generator): self
+    {
+        $this->generators[] = $generator;
+
+        return $this;
+    }
+
+    public function setBaseSitemapUrl(string $baseSitemapUrl): self
+    {
+        $baseSitemapUrl = rtrim($baseSitemapUrl, '/') . '/';
+        $this->baseSitemapUrl = $baseSitemapUrl;
+
+        return $this;
+    }
+
+    public function setOutputDirectory(string $outputDirectory = '@app/web'): self
+    {
+        $outputDirectory = rtrim($outputDirectory, '/') . '/';
+        $this->outputDirectory = $outputDirectory;
+
+        return $this;
     }
 }
