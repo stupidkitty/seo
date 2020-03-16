@@ -7,7 +7,7 @@ use SK\CronModule\Handler\HandlerInterface;
 
 class SitemapCreate implements HandlerInterface
 {
-    public function run()
+    public function run(): void
     {
         $sitemapBuilder = Yii::$container->get(SitemapBuilder::class);
 
