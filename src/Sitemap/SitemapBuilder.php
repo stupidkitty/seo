@@ -4,12 +4,14 @@ namespace SK\SeoModule\Sitemap;
 use Yii;
 use yii\helpers\FileHelper;
 use RS\Component\Core\Settings\SettingsInterface;
+use yii\di\Instance;
 
 class SitemapBuilder
 {
     public $generators = [];
     public $baseSitemapUrl;
     public $outputDirectory = '@app/web/sitemap';
+    public $urlManager = 'urlManager';
 
     private $settings;
 
@@ -20,7 +22,10 @@ class SitemapBuilder
 
     public function build()
     {
+        $this->urlManager = Instance::ensure($this->urlManager);
+
         $sitemapGenerator = $this->buildGenerator();
+        $sitemapGenerator->setUrlManager($this->urlManager);
 
         if (empty($this->baseSitemapUrl)) {
             $siteUrl = rtrim($this->settings->get('site_url', 'https://site.com/'), '/');
