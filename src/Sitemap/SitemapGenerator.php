@@ -11,7 +11,7 @@ class SitemapGenerator
 {
     private $baseSitemapUrl;
     private $outputDirectory;
-
+    private $urlManager;
     private $generators = [];
 
     /**
@@ -49,7 +49,7 @@ class SitemapGenerator
             $filepath = "{$this->outputDirectory}/{$filename}";
             $sitemap = new Sitemap($filepath);
 
-            $generator->create($sitemap);
+            $generator->create($sitemap, $this->urlManager);
 
             $sitemap->write();
 
@@ -99,6 +99,13 @@ class SitemapGenerator
     {
         $outputDirectory = rtrim($outputDirectory, '/') . '/';
         $this->outputDirectory = $outputDirectory;
+
+        return $this;
+    }
+
+    public function setUrlManager($urlManager): self
+    {
+        $this->urlManager = $urlManager;
 
         return $this;
     }

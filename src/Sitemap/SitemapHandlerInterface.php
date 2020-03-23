@@ -7,5 +7,5 @@ interface SitemapHandlerInterface
 {
     public function getFilename(): string;
 
-    public function create(Sitemap $sitemap);
+    public function create(Sitemap $sitemap, $urlManager);
 }
