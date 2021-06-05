@@ -1,6 +1,7 @@
 {
     "name": "stupidkitty/seo",
     "description": "Seo module",
+    "version": "3.0",
     "type": "yii2-extension",
     "keywords": ["yii2","seo"],
     "license": "MIT",
