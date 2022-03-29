@@ -3,6 +3,7 @@ namespace SK\SeoModule\Controller;
 
 use Yii;
 use yii\web\Controller;
+use yii\web\Response;
 use yii\web\UploadedFile;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
@@ -16,7 +17,7 @@ class FaviconController extends Controller
     /**
      * @inheritdoc
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'access' => [
@@ -40,9 +41,9 @@ class FaviconController extends Controller
     /**
      * Show upload favicon form;
      *
-     * @return mixed
+     * @return string
      */
-    public function actionIndex()
+    public function actionIndex(): string
     {
         return $this->render('index');
     }
@@ -50,12 +51,11 @@ class FaviconController extends Controller
     /**
      * Upload favicon.ico
      *
-     * @return mixed
+     * @return Response
      */
-    public function actionUpload()
+    public function actionUpload(): Response
     {
         $form = new IconUploadForm();
-        $form->icon = UploadedFile::getInstance($form, 'icon');
 
         if ($form->isValid()) {
             $path = Yii::getAlias('@root/web');
@@ -64,6 +64,6 @@ class FaviconController extends Controller
             Yii::$app->session->addFlash('error', implode('<br>', $form->getErrorSummary(true)));
         }
 
-        $this->redirect(['index']);
+        return $this->redirect(['index']);
     }
 }
