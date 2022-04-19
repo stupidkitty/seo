@@ -3,7 +3,7 @@ namespace SK\SeoModule\CronJob;
 
 use Yii;
 use SK\SeoModule\Sitemap\SitemapBuilder;
-use SK\CronModule\Handler\HandlerInterface;
+use App\Infrastructure\Cron\HandlerInterface;
 
 class SitemapCreate implements HandlerInterface
 {
